@@ -1,5 +1,5 @@
 const express = require('express');
-const { v4: uuid } = require('uuid'); // This will generate random unique ID
+// const { v4: uuid } = require('uuid'); // This will generate random unique ID
 const createError = require('http-errors'); // You can create error and pass it to next() middleware, thi will force to trigger the ErrorHandling middleware which have 4 parameters.
 const {check, validationResult} = require('express-validator'); // Validate all the fields comming in request.
 
@@ -9,29 +9,37 @@ const Router = express.Router();
 
 const defaultResponse = {isSuccessfull : true};
 
-const USERS = [
-    {id : 1, name : 'Rahul', email : 'rkant25@SpeechGrammarList.com', password : 'Tester97', imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`},
-    {id : 2, name : 'Ravi', email : 'rkant225@SpeechGrammarList.com', password : 'Tester98', imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`},
-    {id : 3, name : 'Rohit', email : 'rkant2225@SpeechGrammarList.com', password : 'Tester99', imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`},
-];
-
 
 // This will return all the users list.
-Router.get('/', (req,res,next)=>{
-    res.send({...defaultResponse, users : USERS});
+Router.get('/', async (req,res,next)=>{
+
+    try {
+        const users = await User.find({}, '-password').exec(); // This will fetch all the users created till now, and select everything except password.
+        res.send({...defaultResponse, users : users.map(user => user.toObject({getters : true}))});
+    } catch(err) {
+        res.status(422);
+        res.send({isSuccessfull : false, error : err})
+    }
+    
 });
 
 // This will return the single user's details.
-Router.get('/:userId', (req,res,next)=>{
+Router.get('/:userId', async (req,res,next)=>{
     const {userId} = req.params;
-    const index = USERS.findIndex((user)=> user.id == userId);
-    if(index >= 0){
-        res.send({...defaultResponse, user : USERS[index]});
-    } else {
-        const error = createError.NotFound('No user found for this userId');
-        next(error);
+
+    try {
+        const user = await User.findById(userId).exec();
+        if(user){
+            res.send({...defaultResponse, user : user.toObject({getters : true})});
+        } else {
+            const error = createError.NotFound('No user found for this userId');
+            next(error);
+        }
+        
+    } catch(err) {
+        res.status(422);
+        res.send({isSuccessfull : false, error : err})
     }
-    
 });
 
 
@@ -48,13 +56,14 @@ Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
 
     if(validationResult(req).errors.length === 0){
         try{
-            const existingUserWithThisMailId = await User.find({email : email}).exec();
-            if(existingUserWithThisMailId.length === 0){
+            const existingUsersWithThisMailId = await User.find({email : email}).exec();
+            if(existingUsersWithThisMailId.length === 0){
                 const createdUser = new User({
                     name : name,
                     email : email,
                     password : password,
-                    imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`
+                    imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`,
+                    places : []
                 });
     
                 await createdUser.save();
@@ -78,20 +87,22 @@ Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
 
 
 // This will validate the Credentials entered by user, and will help user to get logged in.
-Router.post('/login', (req,res,next)=>{
+Router.post('/login', async (req,res,next)=>{
     const {email, password} = req.body;
-    const index = USERS.findIndex((user)=>user.email == email);
-    if(index >= 0){
-        const identifiedUser = USERS[index];
-        if(identifiedUser.password == password){
-            res.send({...defaultResponse});
+    try{
+        const existingUserWithThisMailId = await User.findOne({email : email}).exec();
+
+        if(existingUserWithThisMailId && existingUserWithThisMailId.password == password){
+            res.status(201);
+            res.send({...defaultResponse})
         } else {
-            const error = createError.Unauthorized('Invalid credentials.');
+            const error = createError.Forbidden('Invalid credentials, Please try again.');
             next(error);
         }
-    } else {
-        const error = createError.NotFound('User does not exist.');
-        next(error);
+        
+    } catch(err) {
+        res.status(422);
+        res.send({isSuccessfull : false, error : err})
     }
 });
 

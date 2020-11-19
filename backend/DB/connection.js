@@ -8,7 +8,7 @@ const connectDB = async (DB_NAME)=>{
     const URI = `mongodb://rkant225:rkant225@expresswithmongodb-shard-00-00.kfytu.mongodb.net:27017,expresswithmongodb-shard-00-01.kfytu.mongodb.net:27017,expresswithmongodb-shard-00-02.kfytu.mongodb.net:27017/${DB_NAME}?ssl=true&replicaSet=atlas-h29i6x-shard-0&authSource=admin&retryWrites=true&w=majority`;
     console.log('Trying to connect...')
     try{
-        await mongoose.connect(URI, {useNewUrlParser: true, useUnifiedTopology: true});
+        await mongoose.connect(URI, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex : true});
         console.log(chalk.blueBright('Connected to database successfully...!!!'))
     }catch{
         console.log(chalk.red('Unable to connect to database..!!!'));

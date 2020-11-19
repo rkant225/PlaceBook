@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
     email : {type : String, required : true, unique : true},
     password : {type : String, required : true, minlength : 6},
     imageURL : {type : String, required : true},
-    // places : {type : String}
+    places : [{ type : mongoose.Types.ObjectId, required : true, ref : 'Place' }]
 });
 
 userSchema.plugin(uniqueValidator);// To query email faster.
