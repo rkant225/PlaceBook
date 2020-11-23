@@ -1,5 +1,6 @@
 const initialState = {
     users : [],
+    currentlySelectedUser : {}
 };
 
 const usersReducer = (state = initialState, action)=>{
@@ -8,6 +9,12 @@ const usersReducer = (state = initialState, action)=>{
             return {
                 ...state,
                 users : action.payload
+            }
+        case 'UPDATE_CURRENTLY_SELECTED_USER' :
+            const currentlySelectedUser = state.users.find((user)=>user.id == action.payload);
+            return {
+                ...state,
+                currentlySelectedUser : currentlySelectedUser
             }
         default :
             return {

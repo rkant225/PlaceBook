@@ -19,7 +19,7 @@ const LoginForm = (props)=>{
         <React.Fragment>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Field name="email" label="Email" component={renderTextField}/>
-                <Field name="password" label="Password" component={renderTextField} style={{marginTop : '1rem', marginBottom : '1rem'}}/>
+                <Field name="password" type="password" label="Password" component={renderTextField} style={{marginTop : '1rem', marginBottom : '1rem'}}/>
                 <Typography align="center">
                     <Button type="submit" variant="contained" color="primary" disabled={pristine || submitting}>Login</Button>
                 </Typography>

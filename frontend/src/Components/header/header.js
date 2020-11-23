@@ -39,11 +39,15 @@ const useStyles = makeStyles((theme) => ({
 
 
 const Header = (props)=>{
-    const {history} = props;
-    const {isAuthenticated, currentUserDetails} = props;
-    const {name} = currentUserDetails;
+    const {history, dispatch} = props;
+    const {isAuthenticated, loggedInUserDetails} = props;
+    const {id, name} = loggedInUserDetails;
 
     const [openSideDrawar, setOpenSideDrawar] = React.useState(false);
+
+    const updateCurrentUserDetails = () =>{
+        dispatch({type : 'UPDATE_CURRENTLY_SELECTED_USER', payload : id});
+    }
 
     const handleNavigationMenuClick = (menuName)=>{
         console.log('menuName', menuName)
@@ -51,7 +55,8 @@ const Header = (props)=>{
             history.push('/');
         }
         if(menuName === 'OPEN_MY_PLACES'){
-            history.push('/places/123');
+            updateCurrentUserDetails();
+            history.push(`/places/${id}`);
         }
         if(menuName === 'ADD_NEW_PLACE'){
             history.push('/add-place');
@@ -66,6 +71,7 @@ const Header = (props)=>{
         setOpenSideDrawar(false)
     }
 
+    
 
     const classes = useStyles();
 
@@ -83,7 +89,7 @@ const Header = (props)=>{
                             <Typography>All Users</Typography>
                         </NavLink>
                         {isAuthenticated && 
-                            <NavLink to="/places/123" className={classes.linkStyle} activeClassName={classes.activeTab}>
+                            <NavLink to={`/places/${id}`} onClick={()=>{updateCurrentUserDetails()}} className={classes.linkStyle} activeClassName={classes.activeTab}>
                                 <Typography>My Places</Typography>
                             </NavLink>
                         }
@@ -197,7 +203,7 @@ const mapStateToProps =(state)=>{
     const {LoginModel} = state;
     return{
         isAuthenticated : LoginModel.isAuthenticated,
-        currentUserDetails : LoginModel.currentUserDetails
+        loggedInUserDetails : LoginModel.loggedInUserDetails
     }
 }
 

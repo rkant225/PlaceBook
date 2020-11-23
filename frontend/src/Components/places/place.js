@@ -5,13 +5,16 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import StreetviewIcon from '@material-ui/icons/Streetview';
 import { useParams } from 'react-router-dom';
 import DeleteConfirmationModal from './deleteConfirmationModal';
+import { connect } from 'react-redux';
 
 const Place = (props)=>{
-    const {isAuthenticated} = props;
+    const {loggedInUserDetails, currentlySelectedUser} = props;
     const {place, onPlaceEdit, onPlaceDelete, onOpenPlaceOnGoogleMaps} = props;
     const {userId} = useParams();
 
-
+    const canDisplayThisActionItem = () =>{
+        return loggedInUserDetails.id == currentlySelectedUser.id;
+    }
 
     return(
         <React.Fragment>
@@ -38,13 +41,13 @@ const Place = (props)=>{
                     
                     <div style={{textAlign : 'right'}}>
                         {/* <IconButton onClick={()=>{console.log('hahaha')}} title="Delete"> */}
-                        {isAuthenticated && 
+                        {canDisplayThisActionItem() && 
                             <IconButton onClick={()=>onPlaceDelete(place)} title="Delete">
                                 <DeleteIcon fontSize="small" />
                             </IconButton>
                         }
                         
-                        {isAuthenticated && 
+                        {canDisplayThisActionItem() && 
                             <IconButton onClick={()=>onPlaceEdit(place)} title="Edit">
                                 <BorderColorIcon fontSize="small" />
                             </IconButton>
@@ -61,4 +64,20 @@ const Place = (props)=>{
     );
 }
 
-export default Place;
+const mapStateToProps =(state)=>{
+    const {LoginModel, UsersModel} = state;
+    return{
+        loggedInUserDetails : LoginModel.loggedInUserDetails,
+        currentlySelectedUser : UsersModel.currentlySelectedUser,
+
+    }
+}
+
+const mapDispatchToProps = (dispatch)=>{
+    return {
+        dispatch,
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Place);

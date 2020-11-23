@@ -19,6 +19,10 @@ const validateSignUpForm = (values) => {
         errors.email = 'Invalid email address'
     }
 
+    if (values.password &&  values.password.length < 6) {
+      errors.password = 'Password must be at least 6 character long.'
+    }
+
     if (values.password &&  values.confirmPassword && values.password !== values.confirmPassword) {
         errors.confirmPassword = 'There is mismatch in password.'
     }

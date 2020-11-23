@@ -1,25 +1,67 @@
 import { Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { getFormInitialValues } from 'redux-form';
 import AddOrEditPlaceForm from './addOrEditPlaceForm';
+import * as Actions from '../../Redux/Actions/placesActions';
 
-const AddNewPlace = (props)=>{
+const AddOrEditPlace = (props)=>{
+    const {history} = props;
+    const {loggedInUserDetails} = props;
+    const {id, name, email} = loggedInUserDetails;
+
+    const {addNewPlace, editExistingPlace, getPlaceByPlaceId, currentlySelectedPlace} = props;
+
     const {placeId} = useParams();
     const isEdit = placeId ? true : false;
 
-    const onNewPlaceAddition = (formData)=>{
-        console.log(formData)
+    useEffect(()=>{
+        if(placeId){
+            getPlaceByPlaceId(placeId);
+        }
+    }, [placeId]);
+
+    const onNewPlaceAddOrEdit = (formData)=>{
+        const {address, description, title} = formData;
+        const callBack = ()=>{history.push(`/places/${loggedInUserDetails.id}`)}
+
+        if(isEdit){
+            // placeId, title, description, address
+            const updatedPlaceData = {
+                placeId : placeId,
+                title : title,
+                address : address,
+                description : description,
+            };
+            editExistingPlace(updatedPlaceData, callBack);
+        } else {
+            const newPlaceData = {
+                userId : id,
+                title : title,
+                address : address,
+                description : description,
+            };
+            addNewPlace(newPlaceData, callBack);
+        }
     }
 
 
     const getFormInitialValues = ()=>{
-        const initialValues = {
-            title : isEdit ? 'Pink CIty' : '',
-            address : isEdit ? 'Rajasthan Jaipur' : '',
-            description : isEdit ? 'This is the best city, situated in north west part of india.' : ''
+        if(currentlySelectedPlace && isEdit){
+            const {title, address, description} = currentlySelectedPlace;
+            const initialValues = {
+                title : title,
+                address : address,
+                description : description
+            }
+            return initialValues;
+        } else {
+            return {
+                title : '',
+                address : '',
+                description : ''
+            }
         }
-        return initialValues;
     }
 
     return(
@@ -33,7 +75,7 @@ const AddNewPlace = (props)=>{
                         </Typography>
 
                         <div style={{padding : '1.5rem'}}>
-                            <AddOrEditPlaceForm isEdit={isEdit} onSubmit={onNewPlaceAddition} initialValues={getFormInitialValues()}/>
+                            <AddOrEditPlaceForm isEdit={isEdit} onSubmit={onNewPlaceAddOrEdit} initialValues={getFormInitialValues()}/>
                         </div>
                     </Paper>
                 </Grid>
@@ -43,4 +85,23 @@ const AddNewPlace = (props)=>{
     );
 }
 
-export default AddNewPlace;
+const mapStateToProps =(state)=>{
+    const {PlacesModel, LoginModel} = state;
+    return{
+        currentlySelectedPlace : PlacesModel.currentlySelectedPlace,
+        isAuthenticated : LoginModel.isAuthenticated,
+        loggedInUserDetails : LoginModel.loggedInUserDetails,
+    }
+}
+
+const mapDispatchToProps = (dispatch)=>{
+    return {
+        dispatch,
+        addNewPlace : (newPlaceData, callBack)=> dispatch(Actions.addNewPlace(newPlaceData, callBack)),
+        editExistingPlace : (updatedPlaceData, callBack)=> dispatch(Actions.editExistingPlace(updatedPlaceData, callBack)),
+        getPlaceByPlaceId : (placeId)=> dispatch(Actions.getPlaceByPlaceId(placeId)),
+        
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddOrEditPlace);

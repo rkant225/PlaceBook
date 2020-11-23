@@ -1,37 +1,46 @@
 import API from '../API/api';
 import {startLoading, stopLoading} from './loadingActions';
 
-export const signUp =()=>{
+export const signUp =(name, email, password)=>{
     return async (dispatch)=>{
         startLoading(dispatch);
-        const path = 'https://jsonplaceholder.typicode.com/users';
-        const users = await API.request(path, 'Get');
+        const path = '/api/users/signup';
+        const data = {
+            name : name,
+            email : email,
+            password : password
+        }
+        const response = await API.request(path, 'Post', data);
+        console.log('response', response);
 
-        if(users){
-            dispatch({ type: 'LOGIN'});
-            dispatch({type : 'ADD_CURRENT_USER_DETAILS', payload : {name : 'Paritosh Singh'}})
+        if(response.isSuccessfull){
+            dispatch({ type: 'LOGIN', payload : response.user});
             dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Account created successfully, And now you are logged in.'});
             stopLoading(dispatch);
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable Login, Please try again.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage});
             stopLoading(dispatch);
         }        
     }          
 }
 
-export const login =()=>{
+export const login =(email, password)=>{
     return async (dispatch)=>{
         startLoading(dispatch);
-        const path = 'https://jsonplaceholder.typicode.com/users';
-        const users = await API.request(path, 'Get');
+        const path = '/api/users/login';
+        const data = {
+            email : email, 
+            password : password
+        };
+        const response = await API.request(path, 'Post', data);
 
-        if(users){
-            dispatch({ type: 'LOGIN'});
-            dispatch({type : 'ADD_CURRENT_USER_DETAILS', payload : {name : 'Rahul Singh'}})
+        if(response.isSuccessfull){
+            dispatch({ type: 'LOGIN', payload : response.user});
             dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Logged in successfully.'});
             stopLoading(dispatch);
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable Login, Please try again.'});
+            console.log('Error..')
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage});
             stopLoading(dispatch);
         }        
     }          

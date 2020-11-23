@@ -1,4 +1,5 @@
 import Axios from 'axios';
+import {BASE_API_URL} from '../../Config';
 
 const request = async (path, method, data) =>{
 
@@ -11,7 +12,7 @@ const request = async (path, method, data) =>{
     const response = await Axios({ 
         method: httpMethod, 
         data : data || {},
-        url: path,
+        url: BASE_API_URL + path,
         headers: {...headerConfig},
         responseType: responseType,
     });

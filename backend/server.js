@@ -2,7 +2,8 @@ const express = require('express'); // Import Express, this will give you a lot 
 const BodyParser = require('body-parser'); // Import body-parser this will extract the json object passes by client in request body.
 const createError = require('http-errors'); // Import http-errors to trigger different types of errors.
 const chalk = require('chalk'); // This will help you to write color full text in console.
- 
+const cors = require('cors');
+
 const usersRoute = require('./Routes/users');
 const placeRoutes = require('./Routes/places');
 const homeRoutes = require('./Routes/home');
@@ -10,6 +11,10 @@ const homeRoutes = require('./Routes/home');
 
 const Port = process.env.Port || 5000; // Define a PORT on which our Server will run.
 const app = express(); // Execute method returned by Import statement of Express and create your application
+
+//----Allow CORS----
+app.use(cors());
+//----Allow CORS----
 
 //----DataBAse Connection----
 const DB_NAME = 'PlaceBook';

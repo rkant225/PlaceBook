@@ -1,5 +1,6 @@
 import { Grid, makeStyles } from '@material-ui/core';
 import React from 'react';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
     containerDiv: {
@@ -23,8 +24,24 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
+
+// users: [{places: [], _id: "5fb800ebcb4b351af0346b09", name: "Paritosh Singh", email: "a@a.com",…},…]
+// 0: {places: [], _id: "5fb800ebcb4b351af0346b09", name: "Paritosh Singh", email: "a@a.com",…}
+// email: "a@a.com"
+// id: "5fb800ebcb4b351af0346b09"
+// imageURL: "https://picsum.photos/id/93/50"
+// name: "Paritosh Singh"
+// places: []
+
 const UsersList = (props)=>{
-    const {users, history} = props;
+    const {users, history, dispatch} = props;
+
+    const handleUserCardClick = (id) =>{
+        dispatch({type : 'UPDATE_CURRENTLY_SELECTED_USER', payload : id});
+        history.push(`/places/${id}`)
+    }
+
     const classes = useStyles();
     console.log(users)
     return(
@@ -32,19 +49,23 @@ const UsersList = (props)=>{
             <Grid container style={{marginTop : '1rem'}}>
                 <Grid item xs={12} md={1}></Grid>
                 <Grid container item xs={12} md={10} spacing={3}>
-                    {users && users.map((user)=>
-                        <Grid item xs={12} md={4} key={user.id}>
-                            <div className={classes.containerDiv} onClick={()=>{history.push(`/places/${user.id}`)}}>
-                                <div>
-                                    <img src={user.imageURL} style={{borderRadius : '20rem'}}/>
+                    {users && users.map((user)=> {
+
+                        const {id, name, email, imageURL, places} = user;
+
+                        return <Grid item xs={12} md={4} key={id}>
+                                <div className={classes.containerDiv} onClick={()=>{handleUserCardClick(id)}}>
+                                    <div>
+                                        <img src={imageURL} style={{borderRadius : '20rem'}}/>
+                                    </div>
+                                    <div style={{marginLeft : '1rem'}}>
+                                        {name}
+                                        <br/>
+                                        <b>Places : {places.length}</b>
+                                    </div>
                                 </div>
-                                <div style={{marginLeft : '1rem'}}>
-                                    {user.firstName}
-                                    <br/>
-                                    <b>Places : {user.id}</b>
-                                </div>
-                            </div>
-                        </Grid>
+                            </Grid>
+                        }
                     )}
                 </Grid>
                 <Grid item xs={12} md={1}></Grid>
@@ -53,7 +74,17 @@ const UsersList = (props)=>{
     );
 }
 
-export default UsersList;
+const mapStateToProps =(state)=>{
+    return { }
+}
+
+const mapDispatchToProps = (dispatch)=>{
+    return {
+        dispatch,
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(UsersList);
 
 
 

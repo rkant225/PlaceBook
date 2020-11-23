@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const RenderServerError = (props) => {
-    const { errorMessage, hasServerError, hideServerError } = props;
+    const { errorMessage, hasErrorMessage, hideServerError } = props;
 
     const classes = useStyles();
 
@@ -54,7 +54,7 @@ const RenderServerError = (props) => {
         <React.Fragment>
             {props.children}
             <Typography align="left" variant="inherit">
-                <Snackbar className={classes.snackBarStyle} open={hasServerError} autoHideDuration={5000} onClose={hideServerError}>
+                <Snackbar className={classes.snackBarStyle} open={hasErrorMessage} autoHideDuration={5000} onClose={hideServerError}>
                     <SnackbarContent className={classes.snackBarContent} message={
                         <div className={classes.iconAndMessageContainer}>
                             <CancelOutlinedIcon className={classes.iconStyle} />
@@ -71,7 +71,7 @@ const mapStateToProps = (state) => {
     const { ServerErrorModel } = state;
     return {
         errorMessage: ServerErrorModel.errorMessage,
-        hasServerError: ServerErrorModel.hasServerError
+        hasErrorMessage: ServerErrorModel.hasErrorMessage
     };
 };
 

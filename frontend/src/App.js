@@ -1,4 +1,4 @@
-import {Provider} from 'react-redux';
+import {connect, Provider} from 'react-redux';
 import { Box, CssBaseline } from '@material-ui/core';
 import Home from './Components/home';
 import {BrowserRouter, Redirect, Route, Router, Switch} from 'react-router-dom'
@@ -12,13 +12,21 @@ import AddOrEditPlace from './Components/addOrEditPlace';
 import Loader from './Components/SharedComponents/loader';
 import RenderSuccessMessage from './Components/SharedComponents/renderSuccessMessage';
 import RenderErrorMessage from './Components/SharedComponents/renderErrorMessage';
-import store from './Redux/Store/store';
+
+import {startLoading, stopLoading} from './Redux/Actions/loadingActions';
+import { useEffect } from 'react';
 
 
-function App() {
+function App(props) {
+  const {dispatch} = props;
+
+  useEffect(()=>{
+    stopLoading(dispatch);
+  },[]);
+
   return (
     <div className="App">
-      <Provider store={store}>
+      
         <CssBaseline>
           <Loader>
             <RenderSuccessMessage>
@@ -46,9 +54,18 @@ function App() {
             </RenderSuccessMessage>
           </Loader>
         </CssBaseline>
-      </Provider> 
     </div>
   );
 }
 
-export default App;
+const mapStateToProps =(state)=>{
+  return{ }
+}
+
+const mapDispatchToProps = (dispatch)=>{
+  return {
+      dispatch
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

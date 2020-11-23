@@ -55,8 +55,9 @@ Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
     const {name, email, password} = req.body;
 
     if(validationResult(req).errors.length === 0){
-        try{
+        // try{
             const existingUsersWithThisMailId = await User.find({email : email}).exec();
+
             if(existingUsersWithThisMailId.length === 0){
                 const createdUser = new User({
                     name : name,
@@ -67,21 +68,26 @@ Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
                 });
     
                 await createdUser.save();
-    
-                res.status(201);
-                res.send({...defaultResponse, user : createdUser.toObject({getters : true})})
+                const {id, imageURL} = createdUser.toObject({getters : true});
+
+                res.status(200);
+                res.send({...defaultResponse, user : {id, email, name, imageURL}})
             } else {
-                const error = createError.Conflict('User with this email already exist.');
-                next(error);
+                res.status(200);
+                res.send({isSuccessfull : false, errorMessage : 'User with this email already exist.'})
+                // const error = createError.Conflict('User with this email already exist.');
+                // next(error);
             }
             
-        } catch(err) {
-            res.status(422);
-            res.send({isSuccessfull : false, error : err})
-        }
+        // } catch(err) {
+        //     res.status(200);
+        //     res.send({isSuccessfull : false, errorMessage : 'Something went wrong while saving details.',  error : err})
+        // }
     } else {
-        res.status(422);
-        res.send({isSuccessfull : false, errors : validationResult(req).errors})
+        res.status(200);
+        res.send({isSuccessfull : false, errorMessage : 'Unable to create user.', error : validationResult(req).errors})
+        // res.status(422);
+        // res.send({isSuccessfull : false, errors : validationResult(req).errors})
     }
 });
 
@@ -91,18 +97,20 @@ Router.post('/login', async (req,res,next)=>{
     const {email, password} = req.body;
     try{
         const existingUserWithThisMailId = await User.findOne({email : email}).exec();
-
         if(existingUserWithThisMailId && existingUserWithThisMailId.password == password){
-            res.status(201);
-            res.send({...defaultResponse})
+            const {id, email, name, imageURL} = existingUserWithThisMailId.toObject({getters : true});
+            res.status(200);
+            res.send({...defaultResponse, user : {id, email, name, imageURL}});
         } else {
-            const error = createError.Forbidden('Invalid credentials, Please try again.');
-            next(error);
+            res.status(200);
+            res.send({isSuccessfull : false, errorMessage : 'Invalid credentials, Please try again.'})
+            // const error = createError.Forbidden('Invalid credentials, Please try again.');
+            // next(error);
         }
         
     } catch(err) {
-        res.status(422);
-        res.send({isSuccessfull : false, error : err})
+        res.status(200);
+        res.send({isSuccessfull : false, errorMessage : "Something went wrong during authentication process, please try again later.", error : err})
     }
 });
 

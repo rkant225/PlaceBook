@@ -1,6 +1,6 @@
 const initialState = {
     isAuthenticated : false,
-    currentUserDetails : {}
+    loggedInUserDetails : {}
 };
 
 const loginReducer = (state = initialState, action)=>{
@@ -8,17 +8,14 @@ const loginReducer = (state = initialState, action)=>{
         case 'LOGIN' :
             return {
                 ...state,
-                isAuthenticated : true
+                isAuthenticated : true,
+                loggedInUserDetails : action.payload
             }
         case 'LOGOUT' :
             return {
                 ...state,
-                isAuthenticated : false
-            }
-        case 'ADD_CURRENT_USER_DETAILS' :
-            return {
-                ...state,
-                currentUserDetails : action.payload
+                isAuthenticated : false,
+                loggedInUserDetails : {}
             }
         default :
             return {

@@ -14,13 +14,13 @@ const Login = (props)=>{
     const [isLoginMode, setIsLoginMode] = useState(true);
 
     const handleLogin = (formData) =>{
-        console.log(formData)
-        login();
+        const {email, password} = formData;
+        login(email, password);
     }
 
     const handleSignUp = (formData) =>{
-        console.log(formData)
-        signUp();
+        const {name, email, password} = formData;
+        signUp(name, email, password);
     }
 
     const toggleLoginOrSignUpMode = ()=>{
@@ -47,7 +47,7 @@ const Login = (props)=>{
                                 <Typography style={{fontSize : '1.3rem'}}>
                                     Don't have account?
                                 </Typography>
-                                <Link style={{color : 'blue', fontSize : '1.1rem'}} onClick={toggleLoginOrSignUpMode}>Create New Account</Link>
+                                <Link to="#" style={{color : 'blue', fontSize : '1.1rem'}} onClick={toggleLoginOrSignUpMode}>Create New Account</Link>
                             </div>
                         </Paper>
                     }
@@ -64,7 +64,7 @@ const Login = (props)=>{
                                 <Typography style={{fontSize : '1.3rem'}}>
                                     Already have account?
                                 </Typography>
-                                <Link style={{color : 'blue', fontSize : '1.1rem'}} onClick={toggleLoginOrSignUpMode}>Login</Link>
+                                <Link to="#" style={{color : 'blue', fontSize : '1.1rem'}} onClick={toggleLoginOrSignUpMode}>Login</Link>
                             </div>
                         </Paper>
                     }
@@ -87,8 +87,8 @@ const mapStateToProps =(state)=>{
 const mapDispatchToProps = (dispatch)=>{
     return {
         dispatch,
-        login : ()=> dispatch(Actions.login()),
-        signUp : ()=> dispatch(Actions.signUp()),
+        login : (email, password)=> dispatch(Actions.login(email, password)),
+        signUp : (name, email, password)=> dispatch(Actions.signUp(name, email, password)),
     }
 }
 

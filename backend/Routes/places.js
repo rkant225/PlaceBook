@@ -53,10 +53,11 @@ Router.get('/placesOfUser/:userId', async (req,res,next)=>{
     try{
         const places = await Place.find({userId : userId}).exec();
         const finalResponse = {...defaultResponse, places : places.map(place => place.toObject({getters : true}))};
+        res.status(200);
         res.send(finalResponse);
     } catch(err){
-        res.status(404);
-        res.send({isSuccessfull : false, error : err});
+        res.status(200);
+        res.send({isSuccessfull : false, errorMessage : 'Unable to retrive places.', error : err});
     }
 })
 
@@ -142,6 +143,8 @@ Router.patch('/', EditPlaceFieldValidator, async (req,res,next)=>{
                 
                 await place.save();
                 const finalResponse = {...defaultResponse, place : place.toObject({getters : true})};
+
+                res.status(200);
                 res.send(finalResponse);
             } else {
                 const error = createError.NotFound('No place found for this placeId.');
