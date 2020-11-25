@@ -1,10 +1,16 @@
 const initialState = {
+    allPlaces : [],
     placesOfSelectedUser : [],
     currentlySelectedPlace : {}
 };
 
 const placesReducer = (state = initialState, action)=>{
     switch(action.type){
+        case 'GET_ALL_PLACES' :
+            return {
+                ...state,
+                allPlaces : action.payload
+            }
         case 'GET_PLACES_OF_SELECTED_USER' :
             return {
                 ...state,

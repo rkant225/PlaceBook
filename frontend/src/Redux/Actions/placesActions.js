@@ -2,6 +2,23 @@
 import API from '../API/api';
 import {startLoading, stopLoading} from './loadingActions';
 
+export const getAllPlaces =()=>{
+    return async (dispatch)=>{
+        startLoading(dispatch);
+        const path = `/api/places`;
+        const response = await API.request(path, 'Get');
+
+        if(response.isSuccessfull){
+            dispatch({ type: 'GET_ALL_PLACES', payload: response.places || []});
+            dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Places fetched successfully.'});
+            stopLoading(dispatch);
+        } else {
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            stopLoading(dispatch);
+        }        
+    }          
+}
+
 export const getPlacesOfUser =(userId)=>{
     return async (dispatch)=>{
         startLoading(dispatch);
@@ -30,7 +47,7 @@ export const addNewPlace =(newPlaceData, callBack)=>{
             stopLoading(dispatch);
             callBack();
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || 'Unable to add places.'});
             stopLoading(dispatch);
         }        
     }          
@@ -80,7 +97,7 @@ export const deletePlace =(placeId, callBack)=>{
             stopLoading(dispatch);
             callBack();
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to delete places.'});
             stopLoading(dispatch);
         }        
     }          

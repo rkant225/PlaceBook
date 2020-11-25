@@ -12,19 +12,48 @@ const Login = (props)=>{
     const {signUp, login, isAuthenticated} = props;
 
     const [isLoginMode, setIsLoginMode] = useState(true);
+    const [file, setFile] = useState(undefined);
+    const [fileError, setFileError] = useState('');
 
     const handleLogin = (formData) =>{
-        const {email, password} = formData;
-        login(email, password);
+        const { email, password} = formData;
+        const loginData = {email, password};
+        login(loginData);
     }
 
     const handleSignUp = (formData) =>{
         const {name, email, password} = formData;
-        signUp(name, email, password);
+
+        // We will not pass data in JSON format, because we have to upload an image which is of binary type.
+        // const signUpData = {name, email, password};
+        // signUp(signUpData);
+
+        if(file){
+            setFileError('');
+
+            const formData = new FormData(); //Note : FormData can carry Binary data as well, but JSON can't.
+
+            formData.append('name', name)
+            formData.append('email', email)
+            formData.append('password', password)
+            formData.append('image', file); // Binary file data
+
+            signUp(formData);
+        } else {
+            setFileError('Please attach an image.');
+        }
     }
 
     const toggleLoginOrSignUpMode = ()=>{
         setIsLoginMode(!isLoginMode);
+    }
+
+    const handleFileChange = (event) =>{
+        const file = event.target.files[0];
+        if(file){
+            setFile(file);
+            setFileError('');
+        }
     }
 
     return(
@@ -58,7 +87,7 @@ const Login = (props)=>{
                                 Sign Up
                             </Typography>
                             <div style={{padding : '1rem'}}>
-                                <SignUpForm onSubmit={handleSignUp}/>
+                                <SignUpForm onSubmit={handleSignUp} handleFileChange={handleFileChange} fileError={fileError}/>
                             </div>
                             <div style={{width : '60%', margin : 'auto',  padding : '1rem', borderTop : '1px solid blue', textAlign : 'center'}}>
                                 <Typography style={{fontSize : '1.3rem'}}>
@@ -87,8 +116,8 @@ const mapStateToProps =(state)=>{
 const mapDispatchToProps = (dispatch)=>{
     return {
         dispatch,
-        login : (email, password)=> dispatch(Actions.login(email, password)),
-        signUp : (name, email, password)=> dispatch(Actions.signUp(name, email, password)),
+        login : (loginData)=> dispatch(Actions.login(loginData)),
+        signUp : (signUpData)=> dispatch(Actions.signUp(signUpData)),
     }
 }
 

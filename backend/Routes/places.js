@@ -1,8 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const fs = require('fs');
 // const { v4: uuid } = require('uuid'); // This will generate random unique ID
 const createError = require('http-errors'); // You can create error and pass it to next() middleware, thi will force to trigger the ErrorHandling middleware which have 4 parameters.
 const {check, validationResult} = require('express-validator'); // Validate all the fields comming in request.
+
+//Middleware
+const FileUploadMiddleWare = require('../middleWares/fileUpload');
 
 // Models
 const Place = require('../Models/place');
@@ -18,11 +22,18 @@ const defaultResponse = {isSuccessfull : true};
 // This will return all the places
 Router.get('/', async (req,res,next)=>{
     try{
-        const places = await Place.find().exec();
-        const finalResponse = {...defaultResponse, places : places.map(place => place.toObject({getters : true}))}; // '{getters : true}' will convert '_id' to 'id'
+        const places = await Place.find().populate('userId').exec();
+
+        const filalPlacesListWithoutUserPassword = places.map(place => {
+            const placeWithGetter = place.toObject({getters : true});
+            placeWithGetter.userId.password = "";
+            return placeWithGetter;
+        });
+
+        const finalResponse = {...defaultResponse, places : filalPlacesListWithoutUserPassword}; // '{getters : true}' will convert '_id' to 'id'
         res.send(finalResponse);
     } catch(err){
-        res.status(404);
+        res.status(200);
         res.send({isSuccessfull : false, error : err});
     }
 });
@@ -41,7 +52,7 @@ Router.get('/:placeId', async (req,res,next)=>{
             next(error);
         }
     } catch(err){
-        res.status(404);
+        res.status(200);
         res.send({isSuccessfull : false, error : err});
     }
 });
@@ -70,8 +81,8 @@ const AddNewPlaceFieldValidator = [
     check('description').isLength({min : 10}).withMessage('Description must contain at least 10 characters.'),
     check('address').not().isEmpty().withMessage('Address is Madatory.')
 ];
-Router.post('/', AddNewPlaceFieldValidator, async (req,res,next)=>{
-    
+Router.post('/',FileUploadMiddleWare.single('image'), AddNewPlaceFieldValidator, async (req,res,next)=>{
+
     const {userId, title, description, address} = req.body;
     if(validationResult(req).errors.length === 0){ // Check if all the inputs are valid. Verify that Error array is empty.
         try{
@@ -83,7 +94,8 @@ Router.post('/', AddNewPlaceFieldValidator, async (req,res,next)=>{
                     title,
                     description,
                     address,
-                    imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/500`,
+                    // imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/500`,
+                    imageURL : req.file.path.replace(/\\/g,'/'),
                     coordinates : {
                         lat : Math.round((Math.random()) * 10000) / 100,
                         lng : Math.round((Math.random()) * 10000) / 100
@@ -112,11 +124,11 @@ Router.post('/', AddNewPlaceFieldValidator, async (req,res,next)=>{
             }
             
         } catch(err) {
-            res.status(422);
+            res.status(200);
             res.send({isSuccessfull : false, error : err});
         }
     } else {
-        res.status(422);
+        res.status(200);
         res.send({isSuccessfull : false, errors : [...validationResult(req).errors]});
     }
     
@@ -151,11 +163,11 @@ Router.patch('/', EditPlaceFieldValidator, async (req,res,next)=>{
                 next(error);
             }
         } catch(err){
-            res.status(404);
+            res.status(200);
             res.send({isSuccessfull : false, error : err});
         }
     } else {
-        res.status(422);
+        res.status(200);
         res.send({isSuccessfull : false, errors : [...validationResult(req).errors]});
     }
 })
@@ -167,6 +179,7 @@ Router.delete('/:placeId', async (req,res,next)=>{
         // const place = await Place.findById(placeId).exec();
         const place = await Place.findById(placeId).populate('userId').exec(); // Populate will find the User document and populate is's cimplete 'object' instead of populating it with just 'userId'.
         if(place){
+            const imagePath = place.imageURL; // Get the path of Image.
             const session = await mongoose.startSession(); // Create a session
             session.startTransaction(); // Start a transaction
 
@@ -177,6 +190,8 @@ Router.delete('/:placeId', async (req,res,next)=>{
 
             await session.commitTransaction();  // Finaly if every thing goes well then save changes permanently.
 
+            fs.unlink(imagePath, ()=>{}); // Delete the linked picture from local storage.
+
             res.status(200);
             res.send({...defaultResponse});
         } else {
@@ -184,7 +199,7 @@ Router.delete('/:placeId', async (req,res,next)=>{
             next(error);
         }
     } catch(err){
-        res.status(404);
+        res.status(200);
         res.send({isSuccessfull : false, error : err});
     }
 })

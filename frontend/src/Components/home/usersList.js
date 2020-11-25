@@ -1,6 +1,7 @@
 import { Grid, makeStyles } from '@material-ui/core';
 import React from 'react';
 import { connect } from 'react-redux';
+import {BASE_API_URL} from '../../Config/index';
 
 const useStyles = makeStyles((theme) => ({
     containerDiv: {
@@ -38,7 +39,6 @@ const UsersList = (props)=>{
     const {users, history, dispatch} = props;
 
     const handleUserCardClick = (id) =>{
-        dispatch({type : 'UPDATE_CURRENTLY_SELECTED_USER', payload : id});
         history.push(`/places/${id}`)
     }
 
@@ -56,7 +56,8 @@ const UsersList = (props)=>{
                         return <Grid item xs={12} md={4} key={id}>
                                 <div className={classes.containerDiv} onClick={()=>{handleUserCardClick(id)}}>
                                     <div>
-                                        <img src={imageURL} style={{borderRadius : '20rem'}}/>
+                                        {/* <img src={imageURL} style={{borderRadius : '20rem'}}/> */}
+                                        <img src={`${BASE_API_URL}/${imageURL}`} style={{borderRadius : '20rem', width : '50px', height : '50px'}}/>
                                     </div>
                                     <div style={{marginLeft : '1rem'}}>
                                         {name}

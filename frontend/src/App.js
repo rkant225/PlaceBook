@@ -5,6 +5,7 @@ import {BrowserRouter, Redirect, Route, Router, Switch} from 'react-router-dom'
 import history from './router/history';
 import ProtectedRoute from './router/protectedRoute';
 import Places from './Components/places';
+import AllPlaces from './Components/places/allPlaces';
 import Header from './Components/header/header';
 import Login from './Components/login';
 import LogOut from './Components/logOut';
@@ -15,6 +16,7 @@ import RenderErrorMessage from './Components/SharedComponents/renderErrorMessage
 
 import {startLoading, stopLoading} from './Redux/Actions/loadingActions';
 import { useEffect } from 'react';
+
 
 
 function App(props) {
@@ -39,6 +41,7 @@ function App(props) {
                     <Switch>
                       <Route path="/" exact component={(props)=><Home {...props}/>}/>
                       <Route path="/home" component={(props)=><Home {...props}/>}/>
+                      <Route path="/all-places" component={(props)=><AllPlaces {...props}/>}/>
                       <ProtectedRoute path="/add-place/" component={AddOrEditPlace}/>
                       <ProtectedRoute path="/edit-place/:placeId" component={AddOrEditPlace}/>
                       <Route path="/places/:userId" component={(props)=><Places {...props}/>}/>

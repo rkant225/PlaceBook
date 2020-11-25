@@ -12,12 +12,11 @@ import { useEffect } from 'react';
 import DeleteConfirmationModal from './deleteConfirmationModal';
 
 
-const Places = (props)=>{
+const AllPlaces = (props)=>{
 
-    const {match,history, dispatch} = props;
+    const {match,history} = props;
     const {loggedInUserDetails, currentlySelectedUser} = props;
-    const {getPlacesOfUser, placesOfSelectedUser, deletePlace, isAuthenticated} = props;
-    const {userId} = useParams(); // useParams() hook provided by react-router-dom : it will return you an object which contains all the dynamic parameters present in route.
+    const {getAllPlaces, allPlaces, deletePlace, isAuthenticated} = props;
 
     const [openDeletConfirmationModal, setOpenDeletConfirmationModal] = useState(false);
     const [openGoogleMapsModal, setOpenGoogleMapsModal] = useState(false);
@@ -25,11 +24,8 @@ const Places = (props)=>{
 
     // ComponentDidMount
     useEffect(()=>{
-        if(userId){
-            getPlacesOfUser(userId);
-            dispatch({type : 'UPDATE_CURRENTLY_SELECTED_USER', payload : userId});
-        }
-    }, [userId])
+        getAllPlaces();
+    }, [])
 
     const onPlaceEdit =(place)=>{
         const {id} = place;
@@ -45,15 +41,13 @@ const Places = (props)=>{
     const onDeleteConfirmationClick = () =>{
         const {id} = currentlySelectedPlace;
         console.log('I am OK to delete ', id)
-        const callBack = ()=>{getPlacesOfUser(userId)};
+        const callBack = ()=>{getAllPlaces()};
         deletePlace(id, callBack);
         setOpenDeletConfirmationModal(false);
     }
 
     const onOpenPlaceOnGoogleMaps =(place)=>{
         const {id} = place;
-        console.log('Opening google maps for place with place ID : ', id);
-        
         setCurrentlySelectedPlace(place);
         setOpenGoogleMapsModal(true);
     }
@@ -62,13 +56,10 @@ const Places = (props)=>{
 
     return(
         <React.Fragment>
-            
-            {currentlySelectedUser && loggedInUserDetails &&
-                <h1>{currentlySelectedUser.id == loggedInUserDetails.id ? "Your all Places created till date." : `${currentlySelectedUser.name}'s all places created till date.`}</h1>
-            }
+            <h1>All the places created till date.</h1>
 
             <Grid container spacing={3}>
-                {placesOfSelectedUser.map((place)=>
+                {allPlaces && allPlaces.map((place)=>
                     <Place
                         key={place.id}
                         place={place}
@@ -78,11 +69,6 @@ const Places = (props)=>{
                     />
                 )}
             </Grid>
-
-            {/* If there are no places then, provide user a button to add new place. */}
-            {placesOfSelectedUser.length === 0 && 
-                <NoPlacesFound history={history}/>
-            }
 
             {openGoogleMapsModal && <GoogleMapsModal place={currentlySelectedPlace} onClose={()=>{setOpenGoogleMapsModal(false)}}/>}
             {openDeletConfirmationModal && <DeleteConfirmationModal onClose={()=>setOpenDeletConfirmationModal(false)} onDeleteConfirmationClick={onDeleteConfirmationClick}/>}
@@ -94,8 +80,7 @@ const Places = (props)=>{
 const mapStateToProps =(state)=>{
     const {PlacesModel, LoginModel, UsersModel} = state;
     return{
-        placesOfSelectedUser : PlacesModel.placesOfSelectedUser,
-        isAuthenticated : LoginModel.isAuthenticated,
+        allPlaces : PlacesModel.allPlaces,
         loggedInUserDetails : LoginModel.loggedInUserDetails,
         currentlySelectedUser : UsersModel.currentlySelectedUser,
 
@@ -105,10 +90,10 @@ const mapStateToProps =(state)=>{
 const mapDispatchToProps = (dispatch)=>{
     return {
         dispatch,
-        getPlacesOfUser : (userId)=> dispatch(Actions.getPlacesOfUser(userId)),
+        getAllPlaces : ()=> dispatch(Actions.getAllPlaces()),
         deletePlace : (placeId, callBack)=> dispatch(Actions.deletePlace(placeId, callBack)),
     }
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(Places);
+export default connect(mapStateToProps, mapDispatchToProps)(AllPlaces);

@@ -18,7 +18,7 @@ const NoPlacesFound = (props)=>{
                 <SentimentVeryDissatisfiedIcon fontSize="large"/>
             </div>
 
-            { loggedInUserDetails.id == currentlySelectedUser.id &&
+            {loggedInUserDetails && currentlySelectedUser && loggedInUserDetails.id == currentlySelectedUser.id &&
                 <Button onClick={()=>history.push('/add-place')} style={{marginTop : '5rem'}} variant="contained" color="primary">Add new place</Button>
             }
 

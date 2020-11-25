@@ -1,16 +1,12 @@
 import API from '../API/api';
 import {startLoading, stopLoading} from './loadingActions';
 
-export const signUp =(name, email, password)=>{
+export const signUp =(signUpData)=>{
     return async (dispatch)=>{
         startLoading(dispatch);
         const path = '/api/users/signup';
-        const data = {
-            name : name,
-            email : email,
-            password : password
-        }
-        const response = await API.request(path, 'Post', data);
+        
+        const response = await API.request(path, 'Post', signUpData);
         console.log('response', response);
 
         if(response.isSuccessfull){
@@ -24,15 +20,12 @@ export const signUp =(name, email, password)=>{
     }          
 }
 
-export const login =(email, password)=>{
+export const login =(loginData)=>{
     return async (dispatch)=>{
         startLoading(dispatch);
         const path = '/api/users/login';
-        const data = {
-            email : email, 
-            password : password
-        };
-        const response = await API.request(path, 'Post', data);
+        
+        const response = await API.request(path, 'Post', loginData);
 
         if(response.isSuccessfull){
             dispatch({ type: 'LOGIN', payload : response.user});

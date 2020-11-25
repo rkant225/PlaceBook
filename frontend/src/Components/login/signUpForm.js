@@ -1,6 +1,7 @@
 import { Button, TextField, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { Field, reduxForm } from 'redux-form';
+import FileUpload from '../fileUpload/fileUpload';
 import validateSignUpForm from './validateSignUpForm';
 
 const renderTextField = ({ input, myLabel, meta: { touched, error }, maxLength, ...custom }) => {
@@ -8,7 +9,7 @@ const renderTextField = ({ input, myLabel, meta: { touched, error }, maxLength, 
 }
 
 const SignUpForm = (props)=>{
-    const {onSubmit} = props; // Comming from parent
+    const {onSubmit, handleFileChange, fileError} = props; // Comming from parent
     const { handleSubmit, pristine, reset, submitting } = props;
 
     useEffect(()=>{
@@ -22,6 +23,12 @@ const SignUpForm = (props)=>{
                 <Field name="email" label="Email" component={renderTextField} style={{marginTop : '1rem'}}/>
                 <Field name="password" type="password" label="Password" component={renderTextField} style={{marginTop : '1rem'}}/>
                 <Field name="confirmPassword" type="password" label="Confirm password" component={renderTextField} style={{marginTop : '1rem', marginBottom : '1rem'}}/>
+
+                <FileUpload handleFileChange={handleFileChange}/>
+                {fileError && 
+                    <div style={{color : 'red', marginTop : '.5rem'}}>{fileError}</div>
+                }
+
                 <Typography align="center">
                     <Button type="submit" variant="contained" color="primary" disabled={pristine || submitting}>Sign Up</Button>
                 </Typography>

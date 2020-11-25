@@ -45,17 +45,15 @@ const Header = (props)=>{
 
     const [openSideDrawar, setOpenSideDrawar] = React.useState(false);
 
-    const updateCurrentUserDetails = () =>{
-        dispatch({type : 'UPDATE_CURRENTLY_SELECTED_USER', payload : id});
-    }
-
     const handleNavigationMenuClick = (menuName)=>{
         console.log('menuName', menuName)
         if(menuName === 'ALL_USERS'){
             history.push('/');
         }
+        if(menuName === 'ALL_PLACES'){
+            history.push('/all-places');
+        }
         if(menuName === 'OPEN_MY_PLACES'){
-            updateCurrentUserDetails();
             history.push(`/places/${id}`);
         }
         if(menuName === 'ADD_NEW_PLACE'){
@@ -88,8 +86,11 @@ const Header = (props)=>{
                         <NavLink to="/" exact className={classes.linkStyle} activeClassName={classes.activeTab}>
                             <Typography>All Users</Typography>
                         </NavLink>
+                        <NavLink to="/all-places" exact className={classes.linkStyle} activeClassName={classes.activeTab}>
+                            <Typography>All Places</Typography>
+                        </NavLink>
                         {isAuthenticated && 
-                            <NavLink to={`/places/${id}`} onClick={()=>{updateCurrentUserDetails()}} className={classes.linkStyle} activeClassName={classes.activeTab}>
+                            <NavLink to={`/places/${id}`} className={classes.linkStyle} activeClassName={classes.activeTab}>
                                 <Typography>My Places</Typography>
                             </NavLink>
                         }
@@ -155,6 +156,11 @@ const Header = (props)=>{
                                     <ListItem button onClick={()=>handleNavigationMenuClick('ALL_USERS')}>
                                         <ListItemIcon><GroupIcon /></ListItemIcon>
                                         <ListItemText primary={'All Users'} />
+                                    </ListItem>
+
+                                    <ListItem button onClick={()=>handleNavigationMenuClick('ALL_PLACES')}>
+                                        <ListItemIcon><PlaceIcon /></ListItemIcon>
+                                        <ListItemText primary={'All Places'} />
                                     </ListItem>
 
                                     {isAuthenticated && 

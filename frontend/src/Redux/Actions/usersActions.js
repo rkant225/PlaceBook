@@ -11,7 +11,7 @@ export const getAllUsers =()=>{
 
         if(response.isSuccessfull){
             dispatch({ type: 'GET_USERS', payload: response.users || []});
-            dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Places fetched successfully.'});
+            // dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Users fetched successfully.'});
             stopLoading(dispatch);
         } else {
             dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});

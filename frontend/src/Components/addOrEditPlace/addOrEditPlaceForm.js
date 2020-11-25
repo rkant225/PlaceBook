@@ -1,6 +1,7 @@
 import { Button, TextField, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import {Field, reduxForm} from 'redux-form';
+import FileUpload from '../fileUpload/fileUpload';
 import validateDetailsForm from './validateAddNewPlaceForm';
 
 const renderTextField = ({ input, myLabel, meta: { touched, error }, maxLength, ...custom }) => {
@@ -8,12 +9,15 @@ const renderTextField = ({ input, myLabel, meta: { touched, error }, maxLength, 
 }
 
 const AddOrEditPlaceForm = (props)=>{
-    const {isEdit, onSubmit} = props; // Comming from parent
-    const { handleSubmit, pristine, reset, submitting } = props;
+    const {isEdit, onSubmit, fileError} = props; // Comming from parent
+    const { handleSubmit, pristine, reset, submitting, handleFileChange } = props;
     
     useEffect(()=>{
         reset();
-    },[])
+    },[]);
+
+    console.log('fileError-->', fileError)
+    
     return(
         <React.Fragment>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -22,9 +26,15 @@ const AddOrEditPlaceForm = (props)=>{
                     <Field name="address" label="Address" maxLength={40} component={renderTextField} style={{marginTop : '1rem'}}/>
                     <Field name="description" label="Description" maxLength={250} component={renderTextField} style={{marginTop : '1rem'}}/>
 
+                    <FileUpload handleFileChange={handleFileChange}/>
+                    {fileError && 
+                        <div style={{color : 'red', marginTop : '.5rem'}}>{fileError}</div>
+                    }
+
                     <Typography align="right" style={{marginTop : '1rem'}}>
-                    <Button  type="submit" variant="contained" color="primary" disabled={pristine || submitting}>{isEdit ? "Update Place" : "Add Place"}</Button>
+                        <Button  type="submit" variant="contained" color="primary" disabled={pristine || submitting}>{isEdit ? "Update Place" : "Add Place"}</Button>
                     </Typography>
+                    
                 </React.Fragment>
             </form>
         </React.Fragment>

@@ -3,6 +3,8 @@ const BodyParser = require('body-parser'); // Import body-parser this will extra
 const createError = require('http-errors'); // Import http-errors to trigger different types of errors.
 const chalk = require('chalk'); // This will help you to write color full text in console.
 const cors = require('cors');
+const fs = require('fs'); // File system, this will help us in accessing local file system. We will use it to delete the file if any operation causes error in dataBase (like : saving the data, updating the data etc.)
+const path = require('path');
 
 const usersRoute = require('./Routes/users');
 const placeRoutes = require('./Routes/places');
@@ -15,6 +17,10 @@ const app = express(); // Execute method returned by Import statement of Express
 //----Allow CORS----
 app.use(cors());
 //----Allow CORS----
+
+//----Static files serving middleware----
+app.use('/Uploads/images', express.static(path.join('Uploads', 'images'))); // path.join() -> 'Uploads\\images'
+//----Static files serving middleware----
 
 //----DataBAse Connection----
 const DB_NAME = 'PlaceBook';
@@ -49,10 +55,11 @@ app.use((req, res, next)=>{
 
 // Error handling Middleware (it must get 4 paramerers)
 app.use((err, req, res, next)=>{
-  res.status(err.status || 500);
-  res.send({
-    error : {isSuccessfull : false, status : err.status || 500, message : err.message || 'Something went wrong.'}
-  });
+  if(req.file){ // This will delete a mistakenly saved file, because some error occured during DB operationd (sdd, update, delete etc.)
+    fs.unlink(req.file.path, ()=>{})
+  }
+  res.status(err.status || 200);
+  res.send({isSuccessfull : false, status : err.status || 200, errorMessage : err.message || 'Something went wrong.'});
 })
 
 //----Error Handling if none of the routes matched----

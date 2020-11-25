@@ -6,6 +6,8 @@
 /.pnp
 .pnp.js
 
+#Static files
+/backend/Uploads
 # testing
 /coverage
 

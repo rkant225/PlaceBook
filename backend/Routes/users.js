@@ -1,7 +1,10 @@
 const express = require('express');
+const fs = require('fs');
 // const { v4: uuid } = require('uuid'); // This will generate random unique ID
 const createError = require('http-errors'); // You can create error and pass it to next() middleware, thi will force to trigger the ErrorHandling middleware which have 4 parameters.
 const {check, validationResult} = require('express-validator'); // Validate all the fields comming in request.
+
+const FileUploadMiddleWare = require('../middleWares/fileUpload');
 
 const User = require('../Models/user');
 
@@ -51,11 +54,11 @@ const signupFieldValidator = [
     check('password').not().isEmpty().withMessage('Password is mandatory.'),
     check('password').isLength({min : 6}).withMessage('Password password must be at least 6 characters long.'),
 ];
-Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
+Router.post('/signup', FileUploadMiddleWare.single('image'), signupFieldValidator, async (req,res,next)=>{
     const {name, email, password} = req.body;
 
     if(validationResult(req).errors.length === 0){
-        // try{
+        try{
             const existingUsersWithThisMailId = await User.find({email : email}).exec();
 
             if(existingUsersWithThisMailId.length === 0){
@@ -63,7 +66,8 @@ Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
                     name : name,
                     email : email,
                     password : password,
-                    imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`,
+                    // imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`,
+                    imageURL : req.file.path.replace(/\\/g,'/'),
                     places : []
                 });
     
@@ -73,17 +77,26 @@ Router.post('/signup', signupFieldValidator, async (req,res,next)=>{
                 res.status(200);
                 res.send({...defaultResponse, user : {id, email, name, imageURL}})
             } else {
+                if(req.file){
+                    fs.unlink(req.file.path, ()=>{})
+                }
                 res.status(200);
                 res.send({isSuccessfull : false, errorMessage : 'User with this email already exist.'})
                 // const error = createError.Conflict('User with this email already exist.');
                 // next(error);
             }
             
-        // } catch(err) {
-        //     res.status(200);
-        //     res.send({isSuccessfull : false, errorMessage : 'Something went wrong while saving details.',  error : err})
-        // }
+        } catch(err) {
+            if(req.file){
+                fs.unlink(req.file.path, ()=>{})
+            }
+            res.status(200);
+            res.send({isSuccessfull : false, errorMessage : 'Something went wrong while saving details.',  error : err})
+        }
     } else {
+        if(req.file){
+            fs.unlink(req.file.path, ()=>{})
+        }
         res.status(200);
         res.send({isSuccessfull : false, errorMessage : 'Unable to create user.', error : validationResult(req).errors})
         // res.status(422);
