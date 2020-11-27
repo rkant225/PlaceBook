@@ -1,19 +1,29 @@
 import { Grid, Paper, Typography } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Link, Redirect } from 'react-router-dom';
+import { Link, Redirect, useHistory } from 'react-router-dom';
 import LoginForm from './loginForm';
 import SignUpForm from './signUpForm';
+import queryString from 'query-string';
 
 import * as Actions from '../../Redux/Actions/loginActions';
 
 const Login = (props)=>{
-
+    const {location} = props;
     const {signUp, login, isAuthenticated} = props;
 
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [file, setFile] = useState(undefined);
     const [fileError, setFileError] = useState('');
+
+    const [sessionExpirationError, setSessionExpirationError] = useState('');
+
+    useEffect(()=>{
+        const reason = queryString.parse(location.search).reason;
+        if(reason == 'sessionExpired'){
+            setSessionExpirationError('Session expired, please login again.')
+        }
+    },[])
 
     const handleLogin = (formData) =>{
         const { email, password} = formData;
@@ -65,20 +75,24 @@ const Login = (props)=>{
                 <Grid item xs={12} md={4}></Grid>
                 <Grid item xs={12} md={4}>
                     {isLoginMode && 
-                        <Paper style={{marginTop : '3rem'}}>
-                            <Typography style={{padding : '.5rem', backgroundColor : '#3f51b5', color : 'white', fontSize : '1.5rem', fontWeight : '900', textAlign : 'center'}}>
-                                Login
-                            </Typography>
-                            <div style={{padding : '1rem'}}>
-                                <LoginForm onSubmit={handleLogin}/>
-                            </div>
-                            <div style={{width : '60%', margin : 'auto',  padding : '1rem', borderTop : '1px solid blue', textAlign : 'center'}}>
-                                <Typography style={{fontSize : '1.3rem'}}>
-                                    Don't have account?
+                        <React.Fragment>
+                            {sessionExpirationError && <Typography align="center" variant="h5" style={{color : 'red', marginTop : '1rem'}}>{sessionExpirationError}</Typography>}
+                        
+                            <Paper style={{marginTop : '3rem'}}>
+                                <Typography style={{padding : '.5rem', backgroundColor : '#3f51b5', color : 'white', fontSize : '1.5rem', fontWeight : '900', textAlign : 'center'}}>
+                                    Login
                                 </Typography>
-                                <Link to="#" style={{color : 'blue', fontSize : '1.1rem'}} onClick={toggleLoginOrSignUpMode}>Create New Account</Link>
-                            </div>
-                        </Paper>
+                                <div style={{padding : '1rem'}}>
+                                    <LoginForm onSubmit={handleLogin}/>
+                                </div>
+                                <div style={{width : '60%', margin : 'auto',  padding : '1rem', borderTop : '1px solid blue', textAlign : 'center'}}>
+                                    <Typography style={{fontSize : '1.3rem'}}>
+                                        Don't have account?
+                                    </Typography>
+                                    <Link to="#" style={{color : 'blue', fontSize : '1.1rem'}} onClick={toggleLoginOrSignUpMode}>Create New Account</Link>
+                                </div>
+                            </Paper>
+                        </React.Fragment>
                     }
 
                     {!isLoginMode && 

@@ -16,6 +16,8 @@ import RenderErrorMessage from './Components/SharedComponents/renderErrorMessage
 
 import {startLoading, stopLoading} from './Redux/Actions/loadingActions';
 import { useEffect } from 'react';
+import Authenticator from './Components/authenticator/authenticator';
+import SessionTimeOutModal from './Components/SharedComponents/sessionTimeOutModal';
 
 
 
@@ -35,8 +37,11 @@ function App(props) {
               <RenderErrorMessage>
 
                 <Router history={history}>
-                  <Header/>
 
+                  <Authenticator/>
+                  <SessionTimeOutModal/>
+                  
+                  <Header/>
                   <Box style={{paddingLeft : '1rem', paddingRight : '1rem'}} >
                     <Switch>
                       <Route path="/" exact component={(props)=><Home {...props}/>}/>

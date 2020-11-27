@@ -8,7 +8,8 @@ const LogOut = (props)=>{
     const {logOut} = props;
 
     useEffect(()=>{
-        logOut()
+        logOut();
+        sessionStorage.clear();
     })
     return(
         <React.Fragment>

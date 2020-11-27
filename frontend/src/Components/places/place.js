@@ -2,7 +2,7 @@ import { Grid, IconButton, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import DeleteIcon from '@material-ui/icons/Delete';
 import BorderColorIcon from '@material-ui/icons/BorderColor';
-import StreetviewIcon from '@material-ui/icons/Streetview';
+import ExploreIcon from '@material-ui/icons/Explore';
 import { useParams } from 'react-router-dom';
 import DeleteConfirmationModal from './deleteConfirmationModal';
 import {BASE_API_URL} from '../../Config/index';
@@ -60,7 +60,7 @@ const Place = (props)=>{
                         </Typography>
 
                         {getCreatorName() && 
-                            <Typography align="right" >
+                            <Typography align="right" style={{fontWeight : 500}}>
                                 - By {getCreatorName()}
                             </Typography>
                         }
@@ -68,7 +68,6 @@ const Place = (props)=>{
                     </div>
                     
                     <div style={{textAlign : 'right'}}>
-                        {/* <IconButton onClick={()=>{console.log('hahaha')}} title="Delete"> */}
                         {canDisplayThisActionItem() && 
                             <IconButton onClick={()=>onPlaceDelete(place)} title="Delete">
                                 <DeleteIcon fontSize="small" />
@@ -82,7 +81,7 @@ const Place = (props)=>{
                         }
 
                         <IconButton onClick={()=>onOpenPlaceOnGoogleMaps(place)} title="View on map">
-                            <StreetviewIcon fontSize="small" />
+                            <ExploreIcon fontSize="small" />
                         </IconButton>
                     </div>
                 </div>

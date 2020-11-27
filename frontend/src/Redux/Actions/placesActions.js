@@ -13,7 +13,7 @@ export const getAllPlaces =()=>{
             dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Places fetched successfully.'});
             stopLoading(dispatch);
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || 'Unable to fetch places.'});
             stopLoading(dispatch);
         }        
     }          
@@ -30,7 +30,7 @@ export const getPlacesOfUser =(userId)=>{
             // dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Places fetched successfully.'});
             stopLoading(dispatch);
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || 'Unable to fetch places.'});
             stopLoading(dispatch);
         }        
     }          
@@ -64,7 +64,7 @@ export const editExistingPlace =(updatedPlaceData, callBack)=>{
             stopLoading(dispatch);
             callBack();
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || 'Unable to fetch places.'});
             stopLoading(dispatch);
         }        
     }          
@@ -80,7 +80,7 @@ export const getPlaceByPlaceId =(placeId)=>{
             dispatch({ type: 'GET_PLACES_BY_PLACE_ID', payload: response.place || {}});
             stopLoading(dispatch);
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to fetch places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || 'Unable to fetch places.'});
             stopLoading(dispatch);
         }        
     }          
@@ -97,7 +97,7 @@ export const deletePlace =(placeId, callBack)=>{
             stopLoading(dispatch);
             callBack();
         } else {
-            dispatch({type : 'DISPALY_SERVER_ERROR', payload : 'Unable to delete places.'});
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || 'Unable to delete places.'});
             stopLoading(dispatch);
         }        
     }          

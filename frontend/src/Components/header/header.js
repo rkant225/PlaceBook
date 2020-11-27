@@ -46,7 +46,6 @@ const Header = (props)=>{
     const [openSideDrawar, setOpenSideDrawar] = React.useState(false);
 
     const handleNavigationMenuClick = (menuName)=>{
-        console.log('menuName', menuName)
         if(menuName === 'ALL_USERS'){
             history.push('/');
         }

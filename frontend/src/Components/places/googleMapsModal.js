@@ -28,7 +28,7 @@ const GoogleMapsModal = (props)=>{
         <Modal open={true} onClose={onClose}>
             <Paper className={classes.paper} >
                 <b>{address}</b>
-                <div style={{minHeight : '30rem',width : '100%', backgroundImage : `URL(https://www.mapsdeveloper.com/wp-content/uploads/2019/11/Google-Maps-API-Static-Map-1024x512.png)`, backgroundSize : 'cover'}}></div>
+                <div style={{minHeight : '30rem',width : '100%', backgroundImage : `URL(https://images.indianexpress.com/2017/05/google-maps-759.jpg)`, backgroundSize : 'cover'}}></div>
             </Paper>
         </Modal>
     );

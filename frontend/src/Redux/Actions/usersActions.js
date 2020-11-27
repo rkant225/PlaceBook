@@ -7,7 +7,6 @@ export const getAllUsers =()=>{
         const path = '/api/users';
         const response = await API.request(path, 'Get');
 
-        console.log('response', response)
 
         if(response.isSuccessfull){
             dispatch({ type: 'GET_USERS', payload: response.users || []});

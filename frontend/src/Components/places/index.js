@@ -44,7 +44,6 @@ const Places = (props)=>{
 
     const onDeleteConfirmationClick = () =>{
         const {id} = currentlySelectedPlace;
-        console.log('I am OK to delete ', id)
         const callBack = ()=>{getPlacesOfUser(userId)};
         deletePlace(id, callBack);
         setOpenDeletConfirmationModal(false);
@@ -52,7 +51,6 @@ const Places = (props)=>{
 
     const onOpenPlaceOnGoogleMaps =(place)=>{
         const {id} = place;
-        console.log('Opening google maps for place with place ID : ', id);
         
         setCurrentlySelectedPlace(place);
         setOpenGoogleMapsModal(true);
@@ -62,7 +60,7 @@ const Places = (props)=>{
 
     return(
         <React.Fragment>
-            
+
             {currentlySelectedUser && loggedInUserDetails &&
                 <h1>{currentlySelectedUser.id == loggedInUserDetails.id ? "Your all Places created till date." : `${currentlySelectedUser.name}'s all places created till date.`}</h1>
             }

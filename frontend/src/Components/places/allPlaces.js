@@ -40,7 +40,6 @@ const AllPlaces = (props)=>{
 
     const onDeleteConfirmationClick = () =>{
         const {id} = currentlySelectedPlace;
-        console.log('I am OK to delete ', id)
         const callBack = ()=>{getAllPlaces()};
         deletePlace(id, callBack);
         setOpenDeletConfirmationModal(false);

@@ -43,7 +43,6 @@ const UsersList = (props)=>{
     }
 
     const classes = useStyles();
-    console.log(users)
     return(
         <React.Fragment>
             <Grid container style={{marginTop : '1rem'}}>

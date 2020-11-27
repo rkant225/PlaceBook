@@ -7,6 +7,7 @@ const {check, validationResult} = require('express-validator'); // Validate all 
 
 //Middleware
 const FileUploadMiddleWare = require('../middleWares/fileUpload');
+const Authenticate = require('../middleWares/authenticate');
 
 // Models
 const Place = require('../Models/place');
@@ -81,56 +82,63 @@ const AddNewPlaceFieldValidator = [
     check('description').isLength({min : 10}).withMessage('Description must contain at least 10 characters.'),
     check('address').not().isEmpty().withMessage('Address is Madatory.')
 ];
-Router.post('/',FileUploadMiddleWare.single('image'), AddNewPlaceFieldValidator, async (req,res,next)=>{
+Router.post('/', Authenticate, FileUploadMiddleWare.single('image'), AddNewPlaceFieldValidator, async (req,res,next)=>{
 
     const {userId, title, description, address} = req.body;
-    if(validationResult(req).errors.length === 0){ // Check if all the inputs are valid. Verify that Error array is empty.
-        try{
-            const existingUser = await User.findById(userId).exec(); // Get user with 'userId'
-                       
-            if(existingUser){ // Check if user exist.
-                const createdPlace = new Place({
-                    userId,
-                    title,
-                    description,
-                    address,
-                    // imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/500`,
-                    imageURL : req.file.path.replace(/\\/g,'/'),
-                    coordinates : {
-                        lat : Math.round((Math.random()) * 10000) / 100,
-                        lng : Math.round((Math.random()) * 10000) / 100
-                    }
-                });
 
-                // Now we will save this place and along with this we will create a connection between existing 'user' and this new 'place'.
-                // As we are doing 2 operations on database, so we must do them in a session.
-                // If any of the operation fails then mongoose will rollback the changes. (if any one is completed)
-                const session = await mongoose.startSession(); // Create a session
-                session.startTransaction(); // Start a transaction
+    if(req.authenticatedUserId == userId){
+        if(validationResult(req).errors.length === 0){ // Check if all the inputs are valid. Verify that Error array is empty.
+            try{
+                const existingUser = await User.findById(userId).exec(); // Get user with 'userId'
+                           
+                if(existingUser){ // Check if user exist.
+                    const createdPlace = new Place({
+                        userId,
+                        title,
+                        description,
+                        address,
+                        // imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/500`,
+                        imageURL : req.file.path.replace(/\\/g,'/'),
+                        coordinates : {
+                            lat : Math.round((Math.random()) * 10000) / 100,
+                            lng : Math.round((Math.random()) * 10000) / 100
+                        }
+                    });
+    
+                    // Now we will save this place and along with this we will create a connection between existing 'user' and this new 'place'.
+                    // As we are doing 2 operations on database, so we must do them in a session.
+                    // If any of the operation fails then mongoose will rollback the changes. (if any one is completed)
+                    const session = await mongoose.startSession(); // Create a session
+                    session.startTransaction(); // Start a transaction
+                    
+                    await createdPlace.save({session : session}); // Save new place, (Temprerly under session)
+    
+                    existingUser.places.push(createdPlace); // Establish the connection between newly created place and existing user.
+                    await existingUser.save({session : session}); // Save the user (Temprerly under session)
+    
+                    await session.commitTransaction();  // Finaly if every thing goes well then save changes permanently.
+    
+                    res.status(201);
+                    res.send({...defaultResponse, place : createdPlace});
+    
+                } else {
+                    const error = createError.NotFound('Unable to save place because provided user Id does not belongs to any user.');
+                    next(error);
+                }
                 
-                await createdPlace.save({session : session}); // Save new place, (Temprerly under session)
-
-                existingUser.places.push(createdPlace); // Establish the connection between newly created place and existing user.
-                await existingUser.save({session : session}); // Save the user (Temprerly under session)
-
-                await session.commitTransaction();  // Finaly if every thing goes well then save changes permanently.
-
-                res.status(201);
-                res.send({...defaultResponse, place : createdPlace});
-
-            } else {
-                const error = createError.NotFound('Unable to save place because provided user Id does not belongs to any user.');
-                next(error);
+            } catch(err) {
+                res.status(200);
+                res.send({isSuccessfull : false, error : err});
             }
-            
-        } catch(err) {
+        } else {
             res.status(200);
-            res.send({isSuccessfull : false, error : err});
+            res.send({isSuccessfull : false, errors : [...validationResult(req).errors]});
         }
     } else {
         res.status(200);
-        res.send({isSuccessfull : false, errors : [...validationResult(req).errors]});
+        res.send({isSuccessfull : false, errorMessage : "Unauthorised Access, It seems that you are not the owner of this place."});
     }
+    
     
 })
 
@@ -143,25 +151,32 @@ const EditPlaceFieldValidator = [
     check('description').isLength({min : 10}).withMessage('Description must contain at least 10 characters.'),
     check('address').not().isEmpty().withMessage('Address is Madatory.')
 ];
-Router.patch('/', EditPlaceFieldValidator, async (req,res,next)=>{
+Router.patch('/', Authenticate, EditPlaceFieldValidator, async (req,res,next)=>{
     const {placeId, title, description, address} = req.body;
     if(validationResult(req).errors.length === 0){
         try{
             const place = await Place.findById(placeId).exec();
-            if(place){
-                place.title = title;
-                place.description = description;
-                place.address = address;
-                
-                await place.save();
-                const finalResponse = {...defaultResponse, place : place.toObject({getters : true})};
-
-                res.status(200);
-                res.send(finalResponse);
-            } else {
-                const error = createError.NotFound('No place found for this placeId.');
-                next(error);
-            }
+                if(place){
+                    if(req.authenticatedUserId == place.userId){
+                        place.title = title;
+                        place.description = description;
+                        place.address = address;
+                        
+                        await place.save();
+                        const finalResponse = {...defaultResponse, place : place.toObject({getters : true})};
+        
+                        res.status(200);
+                        res.send(finalResponse);
+                    } else {
+                        res.status(200);
+                        res.send({isSuccessfull : false, errorMessage : "Unauthorised Access, It seems that you are not the owner of this place."});
+                    }
+                } else {
+                    const error = createError.NotFound('No place found for this placeId.');
+                    next(error);
+                }
+            
+            
         } catch(err){
             res.status(200);
             res.send({isSuccessfull : false, error : err});
@@ -173,27 +188,34 @@ Router.patch('/', EditPlaceFieldValidator, async (req,res,next)=>{
 })
 
 // This will delete a place
-Router.delete('/:placeId', async (req,res,next)=>{
+Router.delete('/:placeId', Authenticate, async (req,res,next)=>{
     const {placeId} = req.params;
     try{
         // const place = await Place.findById(placeId).exec();
         const place = await Place.findById(placeId).populate('userId').exec(); // Populate will find the User document and populate is's cimplete 'object' instead of populating it with just 'userId'.
+
         if(place){
-            const imagePath = place.imageURL; // Get the path of Image.
-            const session = await mongoose.startSession(); // Create a session
-            session.startTransaction(); // Start a transaction
-
-            place.userId.places.pull(place); // Remove the refrence of place from user's places list.
-            await place.userId.save({session : session}); // Save the user model. (Temprerly under session)
-
-            await place.remove({session : session}); // Delete the place, (Temprerly under session)
-
-            await session.commitTransaction();  // Finaly if every thing goes well then save changes permanently.
-
-            fs.unlink(imagePath, ()=>{}); // Delete the linked picture from local storage.
-
-            res.status(200);
-            res.send({...defaultResponse});
+            if(req.authenticatedUserId == place.userId.id){
+                const imagePath = place.imageURL; // Get the path of Image.
+                const session = await mongoose.startSession(); // Create a session
+                session.startTransaction(); // Start a transaction
+    
+                place.userId.places.pull(place); // Remove the refrence of place from user's places list.
+                await place.userId.save({session : session}); // Save the user model. (Temprerly under session)
+    
+                await place.remove({session : session}); // Delete the place, (Temprerly under session)
+    
+                await session.commitTransaction();  // Finaly if every thing goes well then save changes permanently.
+    
+                fs.unlink(imagePath, ()=>{}); // Delete the linked picture from local storage.
+    
+                res.status(200);
+                res.send({...defaultResponse});
+            } else {
+                res.status(200);
+                res.send({isSuccessfull : false, errorMessage : "Unauthorised Access, It seems that you are not the owner of this place."});
+            }
+            
         } else {
             const error = createError.NotFound('No place found for this placeId.');
             next(error);

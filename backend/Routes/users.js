@@ -1,8 +1,11 @@
 const express = require('express');
 const fs = require('fs');
-// const { v4: uuid } = require('uuid'); // This will generate random unique ID
+const { v4: uuid } = require('uuid'); // This will generate random unique ID
 const createError = require('http-errors'); // You can create error and pass it to next() middleware, thi will force to trigger the ErrorHandling middleware which have 4 parameters.
 const {check, validationResult} = require('express-validator'); // Validate all the fields comming in request.
+
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const FileUploadMiddleWare = require('../middleWares/fileUpload');
 
@@ -11,6 +14,12 @@ const User = require('../Models/user');
 const Router = express.Router();
 
 const defaultResponse = {isSuccessfull : true};
+
+const ACCESS_TOKEN_EXPIRY_LIMIT = 5; // 5 minutes
+const REFRESH_TOKEN_EXPIRY_LIMIT = 60 * 24; // 1 Day
+const LIMIT_TIME_IN = 'm' // 's' for Second, 'm' for Minute, 'h' for Hour, 'd' for Day
+let REFRESH_TOKENS = {}; // List of all the Refresh tokens distributed till now.
+
 
 
 // This will return all the users list.
@@ -62,20 +71,27 @@ Router.post('/signup', FileUploadMiddleWare.single('image'), signupFieldValidato
             const existingUsersWithThisMailId = await User.find({email : email}).exec();
 
             if(existingUsersWithThisMailId.length === 0){
+                const hashedPassword = await bcryptjs.hash(password, 12);
+
                 const createdUser = new User({
                     name : name,
                     email : email,
-                    password : password,
+                    password : hashedPassword,
                     // imageURL : `https://picsum.photos/id/${Math.round(Math.random() * 100)}/50`,
                     imageURL : req.file.path.replace(/\\/g,'/'),
                     places : []
                 });
+
+                const access_token = jwt.sign({userId : createdUser.id}, 'MY_SUPER_SECRET_KEY_ACCESS', {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+                const refresh_token = jwt.sign({userId : createdUser.id}, 'MY_SUPER_SECRET_KEY_REFRESH', {expiresIn : `${REFRESH_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+
+                REFRESH_TOKENS = {...REFRESH_TOKENS, [refresh_token] : uuid()}; // Save the refresh token to verify if it exists and we have created it.
     
                 await createdUser.save();
                 const {id, imageURL} = createdUser.toObject({getters : true});
 
                 res.status(200);
-                res.send({...defaultResponse, user : {id, email, name, imageURL}})
+                res.send({...defaultResponse, user : {id, email, name, imageURL}, access_token : access_token, refresh_token : refresh_token});
             } else {
                 if(req.file){
                     fs.unlink(req.file.path, ()=>{})
@@ -110,10 +126,18 @@ Router.post('/login', async (req,res,next)=>{
     const {email, password} = req.body;
     try{
         const existingUserWithThisMailId = await User.findOne({email : email}).exec();
-        if(existingUserWithThisMailId && existingUserWithThisMailId.password == password){
+        const isValidPassword = await bcryptjs.compare(password, existingUserWithThisMailId.password);
+        if(existingUserWithThisMailId && isValidPassword){
             const {id, email, name, imageURL} = existingUserWithThisMailId.toObject({getters : true});
+
+            const access_token = jwt.sign({userId : id}, 'MY_SUPER_SECRET_KEY_ACCESS', {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+            const refresh_token = jwt.sign({userId : id}, 'MY_SUPER_SECRET_KEY_REFRESH', {expiresIn : `${REFRESH_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+
+            REFRESH_TOKENS = {...REFRESH_TOKENS, [refresh_token] : uuid()}; // Save the refresh token to verify if it exists and we have created it.
+
             res.status(200);
-            res.send({...defaultResponse, user : {id, email, name, imageURL}});
+            res.send({...defaultResponse, user : {id, email, name, imageURL}, access_token : access_token, refresh_token : refresh_token});
+
         } else {
             res.status(200);
             res.send({isSuccessfull : false, errorMessage : 'Invalid credentials, Please try again.'})
@@ -127,5 +151,28 @@ Router.post('/login', async (req,res,next)=>{
     }
 });
 
+Router.post('/reNewAccessToken', async (req,res,next)=>{
+    const {refresh_token} = req.body;
+    if(REFRESH_TOKENS[refresh_token]){
+
+        try {
+            const decodedToken = jwt.verify(refresh_token, 'MY_SUPER_SECRET_KEY_REFRESH');
+            const {userId} = decodedToken;
+
+            const access_token = jwt.sign({userId : userId}, 'MY_SUPER_SECRET_KEY_ACCESS', {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+
+            res.status(200);
+            res.send({...defaultResponse, access_token : access_token});
+
+        } catch(err){
+            res.status(200);
+            res.send({isSuccessfull : false, errorMessage : "UnAuthorised Access...!!!", error : err})
+        }
+        
+    } else {
+        res.status(200);
+        res.send({isSuccessfull : false, errorMessage : "This refresh token does not exist, Please log out ans login again."})
+    }
+});
 
 module.exports = Router;

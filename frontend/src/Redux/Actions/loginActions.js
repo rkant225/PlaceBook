@@ -7,10 +7,9 @@ export const signUp =(signUpData)=>{
         const path = '/api/users/signup';
         
         const response = await API.request(path, 'Post', signUpData);
-        console.log('response', response);
 
         if(response.isSuccessfull){
-            dispatch({ type: 'LOGIN', payload : response.user});
+            dispatch({ type: 'LOGIN', payload : {user : response.user, access_token : response.access_token, refresh_token : response.refresh_token}});
             dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Account created successfully, And now you are logged in.'});
             stopLoading(dispatch);
         } else {
@@ -28,12 +27,28 @@ export const login =(loginData)=>{
         const response = await API.request(path, 'Post', loginData);
 
         if(response.isSuccessfull){
-            dispatch({ type: 'LOGIN', payload : response.user});
+            dispatch({ type: 'LOGIN', payload : {user : response.user, access_token : response.access_token, refresh_token : response.refresh_token}});
             dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : 'Logged in successfully.'});
             stopLoading(dispatch);
         } else {
-            console.log('Error..')
             dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage});
+            stopLoading(dispatch);
+        }        
+    }          
+}
+
+export const reNewAccessToken =(refresh_token)=>{
+    return async (dispatch)=>{
+        startLoading(dispatch);
+        const path = '/api/users/reNewAccessToken';
+        const response = await API.request(path, 'Post', {refresh_token : refresh_token});
+
+        if(response.isSuccessfull){
+            dispatch({ type: 'RE_NEW_ACCESS_TOKEN', payload : {access_token : response.access_token} });
+            // dispatch({type : 'DISPALY_SUCCESS_MESSAGE', payload : `New Access token : ${response.access_token}`});
+            stopLoading(dispatch);
+        } else {
+            dispatch({type : 'DISPALY_SERVER_ERROR', payload : response.errorMessage || "You need to login again."});
             stopLoading(dispatch);
         }        
     }          

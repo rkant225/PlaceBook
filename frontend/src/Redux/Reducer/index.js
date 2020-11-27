@@ -6,6 +6,7 @@ import placesReducer from './placesReducer';
 import loadingReducer from './loadingReducer';
 import serverErrorReducer from './serverErrorReducer';
 import serverSuccessReducer from './serverSuccessReducer';
+import sessionTimeOutReducer from './sessionTimeOutReducer';
 
 export default combineReducers(
     {
@@ -16,6 +17,7 @@ export default combineReducers(
         LoadingModel : loadingReducer,
         ServerErrorModel : serverErrorReducer,
         ServerSuccessModal : serverSuccessReducer,
+        SessionTimeOutModel : sessionTimeOutReducer,
 
     }
 );

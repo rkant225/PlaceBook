@@ -16,7 +16,6 @@ const AddOrEditPlaceForm = (props)=>{
         reset();
     },[]);
 
-    console.log('fileError-->', fileError)
     
     return(
         <React.Fragment>
@@ -26,10 +25,8 @@ const AddOrEditPlaceForm = (props)=>{
                     <Field name="address" label="Address" maxLength={40} component={renderTextField} style={{marginTop : '1rem'}}/>
                     <Field name="description" label="Description" maxLength={250} component={renderTextField} style={{marginTop : '1rem'}}/>
 
-                    <FileUpload handleFileChange={handleFileChange}/>
-                    {fileError && 
-                        <div style={{color : 'red', marginTop : '.5rem'}}>{fileError}</div>
-                    }
+                    {!isEdit && <FileUpload handleFileChange={handleFileChange}/>}
+                    {fileError &&  <div style={{color : 'red', marginTop : '.5rem'}}>{fileError}</div> }
 
                     <Typography align="right" style={{marginTop : '1rem'}}>
                         <Button  type="submit" variant="contained" color="primary" disabled={pristine || submitting}>{isEdit ? "Update Place" : "Add Place"}</Button>
