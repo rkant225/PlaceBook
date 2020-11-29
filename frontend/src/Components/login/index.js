@@ -23,6 +23,9 @@ const Login = (props)=>{
         if(reason == 'sessionExpired'){
             setSessionExpirationError('Session expired, please login again.')
         }
+        if(reason == 'didNotLoggedOutForLongTime'){
+            setSessionExpirationError(`It's been long time you have't logged Off. You have been logged Out for security reasons. Please login again.`)
+        }
     },[])
 
     const handleLogin = (formData) =>{

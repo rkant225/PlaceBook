@@ -15,6 +15,11 @@ const Router = express.Router();
 
 const defaultResponse = {isSuccessfull : true};
 
+
+// ------This is for Quick testing-----
+// const ACCESS_TOKEN_EXPIRY_LIMIT = 1; // 5 minutes
+// const REFRESH_TOKEN_EXPIRY_LIMIT = 2; // 1 Day
+// ------This is for Quick testing-----
 const ACCESS_TOKEN_EXPIRY_LIMIT = 5; // 5 minutes
 const REFRESH_TOKEN_EXPIRY_LIMIT = 60 * 24; // 1 Day
 const LIMIT_TIME_IN = 'm' // 's' for Second, 'm' for Minute, 'h' for Hour, 'd' for Day
