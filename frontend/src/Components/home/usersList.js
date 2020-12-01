@@ -1,7 +1,7 @@
 import { Grid, makeStyles } from '@material-ui/core';
 import React from 'react';
 import { connect } from 'react-redux';
-import {BASE_API_URL} from '../../Config/index';
+import {BASE_ASSET_URL} from '../../Config/index';
 
 const useStyles = makeStyles((theme) => ({
     containerDiv: {
@@ -56,7 +56,7 @@ const UsersList = (props)=>{
                                 <div className={classes.containerDiv} onClick={()=>{handleUserCardClick(id)}}>
                                     <div>
                                         {/* <img src={imageURL} style={{borderRadius : '20rem'}}/> */}
-                                        <img src={`${BASE_API_URL}/${imageURL}`} style={{borderRadius : '20rem', width : '50px', height : '50px'}}/>
+                                        <img src={`${BASE_ASSET_URL}/${imageURL}`} style={{borderRadius : '20rem', width : '50px', height : '50px'}}/>
                                     </div>
                                     <div style={{marginLeft : '1rem'}}>
                                         {name}

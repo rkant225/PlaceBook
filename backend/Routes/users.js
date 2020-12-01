@@ -87,8 +87,8 @@ Router.post('/signup', FileUploadMiddleWare.single('image'), signupFieldValidato
                     places : []
                 });
 
-                const access_token = jwt.sign({userId : createdUser.id}, 'MY_SUPER_SECRET_KEY_ACCESS', {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
-                const refresh_token = jwt.sign({userId : createdUser.id}, 'MY_SUPER_SECRET_KEY_REFRESH', {expiresIn : `${REFRESH_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+                const access_token = jwt.sign({userId : createdUser.id}, process.env.JWT_ACCESS_TOKEN_KEY, {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+                const refresh_token = jwt.sign({userId : createdUser.id}, process.env.JWT_REFRESH_TOKEN_KEY, {expiresIn : `${REFRESH_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
 
                 REFRESH_TOKENS = {...REFRESH_TOKENS, [refresh_token] : uuid()}; // Save the refresh token to verify if it exists and we have created it.
     
@@ -131,21 +131,26 @@ Router.post('/login', async (req,res,next)=>{
     const {email, password} = req.body;
     try{
         const existingUserWithThisMailId = await User.findOne({email : email}).exec();
-        const isValidPassword = await bcryptjs.compare(password, existingUserWithThisMailId.password);
-        if(existingUserWithThisMailId && isValidPassword){
-            const {id, email, name, imageURL} = existingUserWithThisMailId.toObject({getters : true});
+        if(existingUserWithThisMailId){
+            const isValidPassword = await bcryptjs.compare(password, existingUserWithThisMailId.password);
+            if(isValidPassword){
+                const {id, email, name, imageURL} = existingUserWithThisMailId.toObject({getters : true});
 
-            const access_token = jwt.sign({userId : id}, 'MY_SUPER_SECRET_KEY_ACCESS', {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
-            const refresh_token = jwt.sign({userId : id}, 'MY_SUPER_SECRET_KEY_REFRESH', {expiresIn : `${REFRESH_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
-
-            REFRESH_TOKENS = {...REFRESH_TOKENS, [refresh_token] : uuid()}; // Save the refresh token to verify if it exists and we have created it.
-
-            res.status(200);
-            res.send({...defaultResponse, user : {id, email, name, imageURL}, access_token : access_token, refresh_token : refresh_token});
-
+                const access_token = jwt.sign({userId : id}, process.env.JWT_ACCESS_TOKEN_KEY, {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+                const refresh_token = jwt.sign({userId : id}, process.env.JWT_REFRESH_TOKEN_KEY, {expiresIn : `${REFRESH_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+    
+                REFRESH_TOKENS = {...REFRESH_TOKENS, [refresh_token] : uuid()}; // Save the refresh token to verify if it exists and we have created it.
+    
+                res.status(200);
+                res.send({...defaultResponse, user : {id, email, name, imageURL}, access_token : access_token, refresh_token : refresh_token});
+            } else {
+                res.status(200);
+                res.send({isSuccessfull : false, errorMessage : 'Invalid password, Please try again.'})
+            }
+            
         } else {
             res.status(200);
-            res.send({isSuccessfull : false, errorMessage : 'Invalid credentials, Please try again.'})
+            res.send({isSuccessfull : false, errorMessage : 'User with this E-Mail Id does not exist.'})
             // const error = createError.Forbidden('Invalid credentials, Please try again.');
             // next(error);
         }
@@ -161,10 +166,10 @@ Router.post('/reNewAccessToken', async (req,res,next)=>{
     if(REFRESH_TOKENS[refresh_token]){
 
         try {
-            const decodedToken = jwt.verify(refresh_token, 'MY_SUPER_SECRET_KEY_REFRESH');
+            const decodedToken = jwt.verify(refresh_token, process.env.JWT_REFRESH_TOKEN_KEY);
             const {userId} = decodedToken;
 
-            const access_token = jwt.sign({userId : userId}, 'MY_SUPER_SECRET_KEY_ACCESS', {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
+            const access_token = jwt.sign({userId : userId}, process.env.JWT_ACCESS_TOKEN_KEY, {expiresIn : `${ACCESS_TOKEN_EXPIRY_LIMIT}${LIMIT_TIME_IN}`});
 
             res.status(200);
             res.send({...defaultResponse, access_token : access_token});

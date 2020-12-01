@@ -6,12 +6,15 @@ const cors = require('cors');
 const fs = require('fs'); // File system, this will help us in accessing local file system. We will use it to delete the file if any operation causes error in dataBase (like : saving the data, updating the data etc.)
 const path = require('path');
 
+require('dotenv').config(); // To access environmental variables
+
 const usersRoute = require('./Routes/users');
 const placeRoutes = require('./Routes/places');
 const homeRoutes = require('./Routes/home');
 
 
-const Port = process.env.Port || 5000; // Define a PORT on which our Server will run.
+
+const Port = process.env.PORT; // Define a PORT on which our Server will run.
 const app = express(); // Execute method returned by Import statement of Express and create your application
 
 //----Allow CORS----
@@ -23,9 +26,8 @@ app.use('/Uploads/images', express.static(path.join('Uploads', 'images'))); // p
 //----Static files serving middleware----
 
 //----DataBAse Connection----
-const DB_NAME = 'PlaceBook';
 const {connectDB} = require('./DB/connection'); // Import and establish MongoDB connection to ATLAS
-connectDB(DB_NAME);
+connectDB();
 //----DataBAse Connection----
 
 

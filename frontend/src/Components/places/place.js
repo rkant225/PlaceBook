@@ -5,7 +5,7 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ExploreIcon from '@material-ui/icons/Explore';
 import { useParams } from 'react-router-dom';
 import DeleteConfirmationModal from './deleteConfirmationModal';
-import {BASE_API_URL} from '../../Config/index';
+import {BASE_ASSET_URL} from '../../Config/index';
 import { connect } from 'react-redux';
 
 const Place = (props)=>{
@@ -39,7 +39,7 @@ const Place = (props)=>{
             <Grid key={place.id} item xs={12} md={3} >
                 <div style={{border : '1px solid #dddddd', borderRadius : '.1rem'}}>
 
-                    <div style={{minHeight : '12rem',width : '100%', backgroundImage : `URL(${BASE_API_URL}/${place.imageURL})`, backgroundSize : 'cover'}}></div>
+                    <div style={{minHeight : '12rem',width : '100%', backgroundImage : `URL(${BASE_ASSET_URL}/${place.imageURL})`, backgroundSize : 'cover'}}></div>
 
                     <div style={{padding : '.5rem', minHeight : '16rem'}}>
 
