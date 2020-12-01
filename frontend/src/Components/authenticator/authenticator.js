@@ -39,6 +39,7 @@ const Authenticator = (props)=>{
         const {exp} = decodedToken; // Get the expiry time.
 
         if(exp < Math.round(new Date().getTime() / 1000)){
+            closeSessionTimeOutModalOpen(); // Close the modal automaticly
             logOut(); // LogOut user
             history.push('/login?reason=sessionExpired')
         }
@@ -79,6 +80,7 @@ const Authenticator = (props)=>{
         const {exp} = decodedToken; // Get the expiry time.
         const currentDifference = exp - Math.round(new Date().getTime() / 1000); // In Seconds
         if(currentDifference < LOGOUT_USER_BEFORE_THIS_MUCH_SECONDS_WHEN_REFRESH_TOKEN_IS_GOING_TO_EXPIRE){
+            closeSessionTimeOutModalOpen(); // Close the modal automaticly
             logOut(); // LogOut user
             history.push('/login?reason=didNotLoggedOutForLongTime')
         }
@@ -111,6 +113,9 @@ const Authenticator = (props)=>{
     }
 
 
+    useEffect(()=>{
+        closeSessionTimeOutModalOpen(); // Close the modal automaticly
+    },[])
 
 
 
