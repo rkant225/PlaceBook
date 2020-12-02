@@ -121,9 +121,12 @@ const Header = (props)=>{
                             LogOut
                         </Typography> */}
                         {isAuthenticated && 
-                            <Typography className={classes.linkStyle} onClick={()=>{history.push('/')}} align="right" style={{flexGrow :  1}}>
-                                {name}
-                            </Typography>
+                            <div onClick={()=>{history.push('/')}} className={classes.linkStyle} style={{display : 'flex', justifyContent : 'space-between', alignItems : 'center', }}>
+                                <Typography align="right" style={{flexGrow :  1, display : 'inline-block', marginRight : '.5rem'}}>
+                                    {name}
+                                </Typography>
+                                <img  src={`https://picsum.photos/id/${Math.round(Math.random() * 100)}/500`} style={{borderRadius : '20rem', width : '50px', height : '50px', display : 'inline-block'}}/>
+                            </div>
                         }
                     </Hidden>
 
@@ -137,10 +140,13 @@ const Header = (props)=>{
                         <Typography onClick={()=>{history.push('/')}} className={classes.siteHeader} style={{ flexGrow : 12, cursor : 'pointer'}}>
                             PlaceBook
                         </Typography>
-                        
+
                         {isAuthenticated && 
-                            <div onClick={()=>{history.push('/')}} style={{width : '100%', textAlign : 'right'}}>
-                                {name}
+                            <div onClick={()=>{history.push('/')}} className={classes.linkStyle} style={{display : 'flex', justifyContent : 'space-between', alignItems : 'center', }}>
+                                <Typography align="right" style={{flexGrow :  1, display : 'inline-block', marginRight : '.5rem'}}>
+                                    {name}
+                                </Typography>
+                                <img  src={`https://picsum.photos/id/${Math.round(Math.random() * 100)}/500`} style={{borderRadius : '20rem', width : '40px', height : '40px', display : 'inline-block'}}/>
                             </div>
                         }
 

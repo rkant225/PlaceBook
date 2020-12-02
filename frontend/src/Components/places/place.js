@@ -38,8 +38,10 @@ const Place = (props)=>{
         <React.Fragment>
             <Grid key={place.id} item xs={12} md={3} >
                 <div style={{border : '1px solid #dddddd', borderRadius : '.1rem'}}>
-
-                    <div style={{minHeight : '12rem',width : '100%', backgroundImage : `URL(${BASE_ASSET_URL}/${place.imageURL})`, backgroundSize : 'cover'}}></div>
+                    {/* To Do */}
+                    {/* Please Uncomment this part once you have paid server, Currently I am commenting this part because from heroku Images get deleted in every 30 minutes */}
+                    {/* <div style={{minHeight : '12rem',width : '100%', backgroundImage : `URL(${BASE_ASSET_URL}/${place.imageURL})`, backgroundSize : 'cover'}}></div> */}
+                    <div style={{minHeight : '12rem',width : '100%', backgroundImage : `URL(https://picsum.photos/id/${Math.round(Math.random() * 100)}/500)`, backgroundSize : 'cover'}}></div>
 
                     <div style={{padding : '.5rem', minHeight : '16rem'}}>
 

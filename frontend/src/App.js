@@ -6,6 +6,7 @@ import history from './router/history';
 import ProtectedRoute from './router/protectedRoute';
 import {startLoading, stopLoading} from './Redux/Actions/loadingActions';
 import React, { Suspense, useEffect } from 'react';
+import FallBackLoader from './Components/SharedComponents/fallBackLoader';
 
 // import Places from './Components/places';
 // import AllPlaces from './Components/places/allPlaces';
@@ -45,7 +46,7 @@ function App(props) {
     <div className="App">
       
         <CssBaseline>
-          <Suspense fallback>
+          <Suspense fallback={<FallBackLoader/>}>
             <Loader>
               <RenderSuccessMessage>
                 <RenderErrorMessage>
